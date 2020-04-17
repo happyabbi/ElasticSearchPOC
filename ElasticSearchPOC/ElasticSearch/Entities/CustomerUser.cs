@@ -5,7 +5,7 @@ namespace ElasticSearch.Entities
 {
     public class CustomerUser
     {
-        public List<string> category { get; set; }
+        public List<string> Category { get; set; }
         public string currency { get; set; }
         public string customer_first_name { get; set; }
         public string customer_full_name { get; set; }
