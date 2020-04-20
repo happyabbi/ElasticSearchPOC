@@ -18,12 +18,20 @@ namespace ElasticSearch.Controllers
             _elasticClient = elasticClient;
         }
 
+        [Route("test")]
+        [HttpGet]
+        public IActionResult Test()
+        {
+            return Ok("controller is accessible");
+        }
+
         /// <summary>
         /// This API is used to fetch all records against the index.
         /// This type of fetching should be avoided with increase in number of records.
         /// </summary>
         /// <returns></returns>
         [Route("")]
+        [HttpGet]
         public async Task<IActionResult> GetAllDocuments()
         {
             try
