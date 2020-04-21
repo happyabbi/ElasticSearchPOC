@@ -131,7 +131,21 @@ namespace ElasticSearch.Controllers
         [Route("fluentattribute")]
         public async Task<IActionResult> IndexDocumentForFluentAttribute([FromBody] Company companyData)
         {
+            /// this method creates document but updates if id is already existing
             var addNewIndex = await _elasticClient.IndexAsync(companyData, i => i.Index(IndexName));
+            if (addNewIndex.IsValid)
+                return Ok(addNewIndex.Id);
+            else
+                return BadRequest(addNewIndex.ServerError.Error);
+        }
+
+        [HttpPost]
+        [Route("create")]
+        public async Task<IActionResult> IndexDocumentWithId([FromBody] Company companyData)
+        {
+            /// this will create document and if id is already there then throws a error
+            /// id is mandatory in this scenario. it can be with the document or can be passed in request.
+            var addNewIndex = await _elasticClient.CreateAsync(companyData, i => i.Index(IndexName).Id(Guid.NewGuid()));
             if (addNewIndex.IsValid)
                 return Ok(addNewIndex.Id);
             else
