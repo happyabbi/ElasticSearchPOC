@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ElasticSearch.Entities
+namespace ElasticSearch.Entities.ECommerce
 {
     public class CustomerUser
     {

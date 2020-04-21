@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ElasticSearch.Entities
+namespace ElasticSearch.Entities.ECommerce
 {
     public class Product
     {

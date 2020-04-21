@@ -121,9 +121,11 @@ namespace ElasticSearch.Controllers
         {
             try
             {
+
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
                                                                                    .From(postRequestBody.PageIndex)
                                                                                    .Size(postRequestBody.PageSize));
+
                 var responseObject = new Entities.SearchResponse
                 {
                     RecordCount=queryResponse.Documents.Count,
