@@ -199,18 +199,19 @@ namespace ElasticSearch.Controllers
                 return BadRequest(addNewIndex.ServerError.Error);
         }
 
-        [HttpDelete]
-        [Route("")]
-        public async Task<IActionResult> DeleteByID([FromHeader] string id)
+        [HttpPost]
+        [Route("delete")]
+        public async Task<IActionResult> DeleteByID([FromBody] Company companyData)
         {
             try
             {
-                var queryResponse = await _elasticClient.DeleteAsync(new DeleteRequest(IndexName, id));
+                var indexResponse = await _elasticClient.IndexAsync(companyData, i => i.Index(IndexName));
+                var queryResponse = await _elasticClient.DeleteAsync(new Nest.DeleteRequest(IndexName, indexResponse.Id));
                 if (queryResponse.IsValid)
                 {
-                    return Ok(queryResponse.Result);
+                    return Ok(queryResponse.Result.ToString());
                 }
-                return BadRequest(queryResponse.ServerError.Error);
+                return BadRequest(queryResponse.OriginalException.Message);
 
             }
             catch (System.Exception ex)
