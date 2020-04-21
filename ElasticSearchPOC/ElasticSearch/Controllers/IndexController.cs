@@ -25,7 +25,7 @@ namespace ElasticSearch.Controllers
             string newIndexName = $"{IndexName}_poco";
             // delete the index if it exists. Useful for demo purposes so that
             // we can re-run this example.
-            
+
             if (_elasticClient.Indices.Exists(newIndexName).Exists)
                 _elasticClient.Indices.Delete(newIndexName);
 
@@ -134,6 +134,26 @@ namespace ElasticSearch.Controllers
                 return Ok(addNewIndex.Id);
             else
                 return BadRequest(addNewIndex.ServerError.Error);
+        }
+
+        [HttpDelete]
+        [Route("")]
+        public async Task<IActionResult> DeleteByID([FromHeader] string id)
+        {
+            try
+            {
+                var queryResponse = await _elasticClient.DeleteAsync(new Nest.DeleteRequest("my_blog", id));
+                if (queryResponse.IsValid)
+                {
+                    return Ok(queryResponse.Result.ToString());
+                }
+                return BadRequest(queryResponse.OriginalException.Message);
+
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
