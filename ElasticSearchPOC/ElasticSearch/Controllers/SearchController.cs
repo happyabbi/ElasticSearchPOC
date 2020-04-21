@@ -104,7 +104,7 @@ namespace ElasticSearch.Controllers
 
                 if(postRequestBody.PageIndex.HasValue)
                 {
-                    from = postRequestBody.PageIndex.Value - 1 * postRequestBody.PageSize.Value;
+                    from = (postRequestBody.PageIndex.Value - 1) * postRequestBody.PageSize.Value;
                 }
 
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
@@ -125,23 +125,40 @@ namespace ElasticSearch.Controllers
             }
         }
 
-        [HttpGet,Route("multi")]
-        public async Task<IActionResult> GetMultiSearch()
+        /// <summary>
+        /// This API is used for fetching the record as per paginantion and sorting both
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("records")]
+        public async Task<IActionResult> FetchRecordsWithPaginationAndSorting([FromBody] PostRequestBody postRequestBody)
         {
             try
             {
+                int from = 0;
 
+                if (postRequestBody.PageIndex.HasValue)
+                {
+                    from = postRequestBody.PageIndex.Value - 1 * postRequestBody.PageSize.Value;
+                }
 
-                var allRecords = await _elasticClient
-                        .SearchAsync<Product>(s => s
-                        .Index(IndexName)
-                        .MatchAll());
-               
+                var sortOrder = postRequestBody.SortOrder != null && postRequestBody.SortOrder == "ASC" ? SortOrder.Ascending : SortOrder.Descending;
 
-                return Ok(allRecords.Documents);
+                var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
+                                                                                   .Sort(ss => ss.Field(postRequestBody.SortField, sortOrder))
+                                                                                   .From(from)
+                                                                                   .Size(postRequestBody.PageSize));
+
+                var responseObject = new Entities.SearchResponse
+                {
+                    RecordCount = queryResponse.HitsMetadata.Total.Value,
+                    Records = queryResponse.Documents
+                };
+                return Ok(JsonConvert.SerializeObject(responseObject));
             }
             catch (Exception ex)
             {
+
                 return BadRequest(ex.Message);
             }
         }
