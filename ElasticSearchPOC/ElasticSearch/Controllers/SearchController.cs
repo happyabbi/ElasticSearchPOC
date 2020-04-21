@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ElasticSearch.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class SearchController : ControllerBase
     {
         private readonly IElasticClient _elasticClient;
@@ -86,7 +86,7 @@ namespace ElasticSearch.Controllers
         {
             try
             {
-                var queryResponse = await _elasticClient.SearchAsync<CustomerUser>(x => x.Index(IndexName).Sort(z => z.Field(p => p.Field(c => value))));
+                var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName).Sort(z => z.Field(p => p.Field(c => value))));
                 var responseObject = new Entities.SearchResponse
                 {
                     Records = queryResponse.Documents
@@ -111,7 +111,7 @@ namespace ElasticSearch.Controllers
         {
             try
             {
-                var queryResponse = await _elasticClient.SearchAsync<CustomerUser>(x => x.Index(IndexName).From(from).Size(size));
+                var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName).From(from).Size(size));
                 var responseObject = new Entities.SearchResponse
                 {
                     Records = queryResponse.Documents
