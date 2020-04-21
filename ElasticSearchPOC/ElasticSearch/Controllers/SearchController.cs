@@ -139,7 +139,7 @@ namespace ElasticSearch.Controllers
 
                 if (postRequestBody.PageIndex.HasValue)
                 {
-                    from = postRequestBody.PageIndex.Value - 1 * postRequestBody.PageSize.Value;
+                    from = (postRequestBody.PageIndex.Value - 1) * postRequestBody.PageSize.Value;
                 }
 
                 var sortOrder = postRequestBody.SortOrder != null && postRequestBody.SortOrder == "ASC" ? SortOrder.Ascending : SortOrder.Descending;
