@@ -46,13 +46,19 @@ namespace ElasticSearch.Controllers
                 var allRecords = await _elasticClient
                         .SearchAsync<object>(s => s.Index(IndexName).Size(Convert.ToInt32(recordsCount)).MatchAll());
 
-                var responseObject = new Entities.SearchResponse
+                if (queryResponse.IsValid)
                 {
-                    RecordCount = recordsCount,
-                    Records = allRecords.Documents
-                };
 
-                return Ok(responseObject);
+                    var responseObject = new Entities.SearchResponse
+                    {
+                        RecordCount = recordsCount,
+                        Records = allRecords.Documents
+                    };
+
+                    return Ok(responseObject);
+                }
+                else
+                    return BadRequest(queryResponse.ServerError.Error)
             }
             catch (Exception ex)
             {
@@ -74,13 +80,18 @@ namespace ElasticSearch.Controllers
                 var sortOrder = postRequestBody.SortOrder != null && postRequestBody.SortOrder == "ASC" ? SortOrder.Ascending : SortOrder.Descending;
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
                                                                                 .Sort(ss => ss.Field(postRequestBody.SortField, sortOrder)));
-
-                var responseObject = new Entities.SearchResponse
+                if (queryResponse.IsValid)
                 {
-                    RecordCount = queryResponse.HitsMetadata.Total.Value,
-                    Records = queryResponse.Documents
-                };
-                return Ok(JsonConvert.SerializeObject(responseObject));
+
+                    var responseObject = new Entities.SearchResponse
+                    {
+                        RecordCount = queryResponse.HitsMetadata.Total.Value,
+                        Records = queryResponse.Documents
+                    };
+                    return Ok(JsonConvert.SerializeObject(responseObject));
+                }
+                else
+                    return BadRequest(queryResponse.ServerError.Error);
             }
             catch (Exception ex)
             {
@@ -102,7 +113,7 @@ namespace ElasticSearch.Controllers
             {
                 int from = 0;
 
-                if(postRequestBody.PageIndex.HasValue)
+                if (postRequestBody.PageIndex.HasValue)
                 {
                     from = (postRequestBody.PageIndex.Value - 1) * postRequestBody.PageSize.Value;
                 }
@@ -110,13 +121,18 @@ namespace ElasticSearch.Controllers
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
                                                                                    .From(from)
                                                                                    .Size(postRequestBody.PageSize));
-
-                var responseObject = new Entities.SearchResponse
+                if (queryResponse.IsValid)
                 {
-                    RecordCount=queryResponse.HitsMetadata.Total.Value,
-                    Records = queryResponse.Documents
-                };
-                return Ok(JsonConvert.SerializeObject(responseObject));
+
+                    var responseObject = new Entities.SearchResponse
+                    {
+                        RecordCount = queryResponse.HitsMetadata.Total.Value,
+                        Records = queryResponse.Documents
+                    };
+                    return Ok(JsonConvert.SerializeObject(responseObject));
+                }
+                else
+                    return BadRequest(queryResponse.ServerError.Error);
             }
             catch (Exception ex)
             {
@@ -149,12 +165,18 @@ namespace ElasticSearch.Controllers
                                                                                    .From(from)
                                                                                    .Size(postRequestBody.PageSize));
 
-                var responseObject = new Entities.SearchResponse
+                if (queryResponse.IsValid)
                 {
-                    RecordCount = queryResponse.HitsMetadata.Total.Value,
-                    Records = queryResponse.Documents
-                };
-                return Ok(JsonConvert.SerializeObject(responseObject));
+
+                    var responseObject = new Entities.SearchResponse
+                    {
+                        RecordCount = queryResponse.HitsMetadata.Total.Value,
+                        Records = queryResponse.Documents
+                    };
+                    return Ok(JsonConvert.SerializeObject(responseObject));
+                }
+                else
+                    return BadRequest(queryResponse.ServerError.Error);
             }
             catch (Exception ex)
             {

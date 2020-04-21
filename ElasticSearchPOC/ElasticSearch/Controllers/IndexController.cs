@@ -43,7 +43,7 @@ namespace ElasticSearch.Controllers
                 return Ok(JsonConvert.SerializeObject(indexMappings.Mappings.Properties.Keys));
             }
             else
-                return BadRequest(createIndexResponse.OriginalException.Message);
+                return BadRequest(createIndexResponse.ServerError.Error);
         }
 
         [HttpPost]
@@ -55,7 +55,7 @@ namespace ElasticSearch.Controllers
             if (addNewIndex.IsValid)
                 return Ok(addNewIndex.Id);
             else
-                return BadRequest(addNewIndex.ServerError);
+                return BadRequest(addNewIndex.ServerError.Error);
         }
 
         [HttpGet]
@@ -78,7 +78,7 @@ namespace ElasticSearch.Controllers
                 return Ok(JsonConvert.SerializeObject(indexMappings.Mappings.Properties.Keys));
             }
             else
-                return BadRequest(createIndexResponse.OriginalException.Message);
+                return BadRequest(createIndexResponse.ServerError.Error);
         }
 
         [HttpPost]
@@ -90,7 +90,7 @@ namespace ElasticSearch.Controllers
             if (addNewIndex.IsValid)
                 return Ok(addNewIndex.Id);
             else
-                return BadRequest(addNewIndex.ServerError);
+                return BadRequest(addNewIndex.ServerError.Error);
         }
 
         [HttpGet]
@@ -122,7 +122,7 @@ namespace ElasticSearch.Controllers
                 return Ok(JsonConvert.SerializeObject(indexMappings.Mappings.Properties.Keys));
             }
             else
-                return BadRequest(createIndexResponse.OriginalException.Message);
+                return BadRequest(createIndexResponse.ServerError.Error);
         }
 
         [HttpPost]
@@ -133,7 +133,7 @@ namespace ElasticSearch.Controllers
             if (addNewIndex.IsValid)
                 return Ok(addNewIndex.Id);
             else
-                return BadRequest(addNewIndex.ServerError);
+                return BadRequest(addNewIndex.ServerError.Error);
         }
     }
 }
