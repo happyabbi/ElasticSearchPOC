@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace ElasticSearch.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class SearchController : ControllerBase
     {
         private readonly IElasticClient _elasticClient;
@@ -88,6 +88,7 @@ namespace ElasticSearch.Controllers
         {
             try
             {
+
                 var sortOrder = postRequestBody.SortOrder != null && postRequestBody.SortOrder == "ASC" ? SortOrder.Ascending : SortOrder.Descending;
 
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
