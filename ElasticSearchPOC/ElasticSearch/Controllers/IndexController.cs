@@ -22,47 +22,75 @@ namespace ElasticSearch.Controllers
         [Route("POCO")]
         public async Task<IActionResult> IndexAutoMapPOCO()
         {
+            string newIndexName = $"{IndexName}_poco";
             // delete the index if it exists. Useful for demo purposes so that
             // we can re-run this example.
-            if (_elasticClient.Indices.Exists(IndexName).Exists)
-                _elasticClient.Indices.Delete(IndexName);
+            
+            if (_elasticClient.Indices.Exists(newIndexName).Exists)
+                _elasticClient.Indices.Delete(newIndexName);
 
             // create the index, adding the mapping for the Page type to the index
             // at the same time. Automap() will infer the mapping from the POCO
-            var createIndexResponse = await _elasticClient.Indices.CreateAsync(IndexName, c => c
-                .Map<Company>(m => m
+            var createIndexResponse = await _elasticClient.Indices.CreateAsync(newIndexName, c => c
+                .Map<Document>(m => m
+                .AutoMap<Company>()
                 .AutoMap(typeof(Employee))));
             if (createIndexResponse.IsValid)
             {
-                var mappingRequest = new GetMappingRequest()
-                {
-                    Pretty = true
-                };
+                var mappingRequest = new GetMappingRequest();
                 var mapping = await _elasticClient.Indices.GetMappingAsync(mappingRequest);
-                mapping.Indices.TryGetValue(IndexName, out IndexMappings indexMappings);
-                return Ok(JsonConvert.SerializeObject(indexMappings.Mappings.Properties.Count));
+                mapping.Indices.TryGetValue(newIndexName, out IndexMappings indexMappings);
+                return Ok(JsonConvert.SerializeObject(indexMappings.Mappings.Properties.Keys));
             }
             else
                 return BadRequest(createIndexResponse.OriginalException.Message);
+        }
+
+        [HttpPost]
+        [Route("POCO")]
+        public async Task<IActionResult> IndexDocumentForPOCO([FromBody] Company companyData)
+        {
+            string newIndexName = $"{IndexName}_poco";
+            var addNewIndex = await _elasticClient.IndexAsync(companyData, i => i.Index(newIndexName));
+            if (addNewIndex.IsValid)
+                return Ok(addNewIndex.Id);
+            else
+                return BadRequest(addNewIndex.ServerError);
         }
 
         [HttpGet]
         [Route("attribute")]
         public async Task<IActionResult> IndexFromAttribute()
         {
+            string newIndexName = $"{IndexName}_attribute";
             // delete the index if it exists. Useful for demo purposes so that
             // we can re-run this example.
-            if (_elasticClient.Indices.Exists(IndexName).Exists)
-                _elasticClient.Indices.Delete(IndexName);
+            if (_elasticClient.Indices.Exists(newIndexName).Exists)
+                _elasticClient.Indices.Delete(newIndexName);
 
-            var createIndexResponse = await _elasticClient.Indices.CreateAsync(IndexName, c => c
-                .Map<EmployeeWithAttribute>(m => m));
+            var createIndexResponse = await _elasticClient.Indices.CreateAsync(newIndexName, c => c
+                .Map<EmployeeWithAttribute>(m => m.AutoMap()));
             if (createIndexResponse.IsValid)
             {
-                return Ok(createIndexResponse.Index);
+                var mappingRequest = new GetMappingRequest();
+                var mapping = await _elasticClient.Indices.GetMappingAsync(mappingRequest);
+                mapping.Indices.TryGetValue(newIndexName, out IndexMappings indexMappings);
+                return Ok(JsonConvert.SerializeObject(indexMappings.Mappings.Properties.Keys));
             }
             else
                 return BadRequest(createIndexResponse.OriginalException.Message);
+        }
+
+        [HttpPost]
+        [Route("attribute")]
+        public async Task<IActionResult> IndexDocumentForAttribute([FromBody] EmployeeWithAttribute companyData)
+        {
+            string newIndexName = $"{IndexName}_attribute";
+            var addNewIndex = await _elasticClient.IndexAsync(companyData, i => i.Index(newIndexName));
+            if (addNewIndex.IsValid)
+                return Ok(addNewIndex.Id);
+            else
+                return BadRequest(addNewIndex.ServerError);
         }
 
         [HttpGet]
@@ -88,10 +116,24 @@ namespace ElasticSearch.Controllers
             ))));
             if (createIndexResponse.IsValid)
             {
-                return Ok(createIndexResponse.Index);
+                var mappingRequest = new GetMappingRequest();
+                var mapping = await _elasticClient.Indices.GetMappingAsync(mappingRequest);
+                mapping.Indices.TryGetValue(IndexName, out IndexMappings indexMappings);
+                return Ok(JsonConvert.SerializeObject(indexMappings.Mappings.Properties.Keys));
             }
             else
                 return BadRequest(createIndexResponse.OriginalException.Message);
+        }
+
+        [HttpPost]
+        [Route("fluentattribute")]
+        public async Task<IActionResult> IndexDocumentForFluentAttribute([FromBody] Company companyData)
+        {
+            var addNewIndex = await _elasticClient.IndexAsync(companyData, i => i.Index(IndexName));
+            if (addNewIndex.IsValid)
+                return Ok(addNewIndex.Id);
+            else
+                return BadRequest(addNewIndex.ServerError);
         }
     }
 }

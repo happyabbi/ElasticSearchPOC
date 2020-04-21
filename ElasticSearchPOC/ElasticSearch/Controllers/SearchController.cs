@@ -1,5 +1,4 @@
-﻿using ElasticSearch.Entities;
-using ElasticSearch.Entities.ECommerce;
+﻿using ElasticSearch.Entities.ECommerce;
 using ElasticSearch.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
@@ -60,25 +59,7 @@ namespace ElasticSearch.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        //[HttpGet, Route("")]
-        //public async Task<IActionResult> GetSearchByQueryString([FromQuery] string query)
-        //{
-        //    try
-        //    {
-        //        var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName).QueryOnQueryString(query));
-        //        var responseObject = new Entities.SearchResponse
-        //        {
-        //            Records = queryResponse.Documents
-        //        };
-        //        return Ok(responseObject);
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-
-        //}
         /// <summary>
         ///  This API is used for sorting the primary level of data present in the indexes
         ///  Parameter value specify which field and sorting order to be done
@@ -92,9 +73,7 @@ namespace ElasticSearch.Controllers
             {
                 var sortOrder = postRequestBody.SortOrder != null && postRequestBody.SortOrder == "ASC" ? SortOrder.Ascending : SortOrder.Descending;
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
-                .DocValueFields(dd => dd.Field(postRequestBody.SortField))
-                .Sort(ss => ss.Field(postRequestBody.SortField, sortOrder)
-                ));
+                                                                                .Sort(ss => ss.Field(postRequestBody.SortField, sortOrder)));
 
                 var responseObject = new Entities.SearchResponse
                 {
@@ -121,16 +100,15 @@ namespace ElasticSearch.Controllers
         {
             try
             {
-                int? pageIndex = 0;
+                int from = 0;
 
                 if(postRequestBody.PageIndex.HasValue)
                 {
-                    pageIndex = postRequestBody.PageIndex > 1 ? postRequestBody.PageSize + 1 : postRequestBody.PageIndex;
-
+                    from = postRequestBody.PageIndex.Value - 1 * postRequestBody.PageSize.Value;
                 }
 
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
-                                                                                   .From(pageIndex)
+                                                                                   .From(from)
                                                                                    .Size(postRequestBody.PageSize));
 
                 var responseObject = new Entities.SearchResponse

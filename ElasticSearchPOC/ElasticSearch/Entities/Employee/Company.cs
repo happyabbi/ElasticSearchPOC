@@ -4,13 +4,18 @@ using System.Collections.Generic;
 
 namespace ElasticSearch.Entities.Employee
 {
-    public class Company
+    public abstract class Document
+    {
+        public JoinField Join { get; set; }
+    }
+
+    public class Company : Document
     {
         public string Name { get; set; }
         public List<Employee> Employees { get; set; }
     }
 
-    public class Employee
+    public class Employee : Document
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

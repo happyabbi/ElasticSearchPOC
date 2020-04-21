@@ -7,7 +7,7 @@ namespace ElasticSearch.Entities.Employee
     [ElasticsearchType(RelationName = "employee")]
     public class EmployeeWithAttribute
     {
-        [Text(Name = "first_name", Norms = false, Similarity = "LMDirichlet")]
+        [Text(Name = "first_name", Norms = false)]
         public string FirstName { get; set; }
 
         [Text(Name = "last_name")]
@@ -16,8 +16,8 @@ namespace ElasticSearch.Entities.Employee
         [Number(DocValues = false, IgnoreMalformed = true, Coerce = true)]
         public int Salary { get; set; }
 
-        [Date(Format = "MMddyyyy")]
-        public DateTime Birthday { get; set; }
+        [Date(Format = "MM-dd-yyyy")]
+        public string Birthday { get; set; }
 
         [Boolean(NullValue = false, Store = true)]
         public bool IsManager { get; set; }
