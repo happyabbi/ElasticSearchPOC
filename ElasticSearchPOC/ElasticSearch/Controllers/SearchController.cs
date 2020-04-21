@@ -1,4 +1,5 @@
 ﻿using ElasticSearch.Entities;
+using ElasticSearch.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
 using System;
@@ -77,18 +78,26 @@ namespace ElasticSearch.Controllers
 
         //}
         /// <summary>
-        ///  Sorting based on field value but its not verified
+        ///  This API is used for sorting the primary level of data present in the indexes
+        ///  Parameter value specify which field and sorting order to be done
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        [HttpGet, Route("sort")]
-        public async Task<IActionResult> GetSortingValue([FromQuery]  string value)
+        [HttpPost, Route("sort")]
+        public async Task<IActionResult> GetSorting([FromBody] PostRequestBody postRequestBody)
         {
             try
             {
-                var queryResponse = await _elasticClient.SearchAsync<CustomerUser>(x => x.Index(IndexName).Sort(z => z.Field(p => p.Field(c => value))));
+                var sortOrder = postRequestBody.SortOrder != null && postRequestBody.SortOrder == "ASC" ? SortOrder.Ascending : SortOrder.Descending;
+
+                var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
+                .DocValueFields(dd => dd.Field(postRequestBody.SortField))
+                .Sort(ss => ss.Field(postRequestBody.SortField, sortOrder)
+                ));
+
                 var responseObject = new Entities.SearchResponse
                 {
+                    RecordCount = queryResponse.Documents.Count,
                     Records = queryResponse.Documents
                 };
                 return Ok(responseObject);
@@ -101,19 +110,22 @@ namespace ElasticSearch.Controllers
         }
 
         /// <summary>
-        /// Pagination in base on doc of index 
+        /// This API is used for fetching the record bases on the page size and page index
         /// </summary>
         /// <param name="from">from</param>
         /// <param name="size"> to</param>
         /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> GetPagination(int from, int size)
+        [HttpPost, Route("pagination")]
+        public async Task<IActionResult> GetPagination([FromBody] PostRequestBody postRequestBody)
         {
             try
             {
-                var queryResponse = await _elasticClient.SearchAsync<CustomerUser>(x => x.Index(IndexName).From(from).Size(size));
+                var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
+                                                                                   .From(postRequestBody.PageIndex)
+                                                                                   .Size(postRequestBody.PageSize));
                 var responseObject = new Entities.SearchResponse
                 {
+                    RecordCount=queryResponse.Documents.Count,
                     Records = queryResponse.Documents
                 };
                 return Ok(responseObject);
