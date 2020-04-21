@@ -58,7 +58,7 @@ namespace ElasticSearch.Controllers
                     return Ok(responseObject);
                 }
                 else
-                    return BadRequest(queryResponse.ServerError.Error)
+                    return BadRequest(queryResponse.ServerError.Error);
             }
             catch (Exception ex)
             {
@@ -175,6 +175,29 @@ namespace ElasticSearch.Controllers
                     };
                     return Ok(JsonConvert.SerializeObject(responseObject));
                 }
+                else
+                    return BadRequest(queryResponse.ServerError.Error);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("order/{orderId}")]
+        public async Task<IActionResult> GetSingleOrder(string orderId)
+        {
+
+            try
+            {
+                var queryResponse = await _elasticClient.GetAsync<CustomerUser>(orderId, 
+                                                              g => g.Index(IndexName)
+                                                                    .SourceIncludes(p => p.email, p => p.order_id, p => p.customer_full_name));
+
+                if (queryResponse.IsValid)
+                    return Ok(JsonConvert.SerializeObject(queryResponse.Source));
                 else
                     return BadRequest(queryResponse.ServerError.Error);
             }
