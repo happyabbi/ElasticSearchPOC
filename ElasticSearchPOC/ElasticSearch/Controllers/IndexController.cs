@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Nest;
 using Newtonsoft.Json;
-using System;
-using System.Dynamic;
 using System.Threading.Tasks;
 
 namespace ElasticSearch.Controllers
@@ -132,53 +130,6 @@ namespace ElasticSearch.Controllers
         public async Task<IActionResult> IndexDocumentForFluentAttribute([FromBody] Company companyData)
         {
             var addNewIndex = await _elasticClient.IndexAsync(companyData, i => i.Index(IndexName));
-            if (addNewIndex.IsValid)
-                return Ok(addNewIndex.Id);
-            else
-                return BadRequest(addNewIndex.ServerError.Error);
-        }
-
-        [HttpPut]
-        [Route("fluentattribute")]
-        public async Task<IActionResult> UpdateWithReplaceDoc([FromBody] Company companyData)
-        {
-            var companyDocs = await _elasticClient.SearchAsync<object>(s => 
-                                                                s.Index(IndexName).MatchAll());
-
-            var enumerator = companyDocs.Hits.GetEnumerator();
-            enumerator.MoveNext();
-
-            var docId = enumerator.Current.Id;
-
-            var addNewIndex = await _elasticClient.UpdateAsync<Company>(docId,
-                                                      u => u.Index(IndexName)
-                                                      .Doc(companyData));
-            if (addNewIndex.IsValid)
-                return Ok(addNewIndex.Id);
-            else
-                return BadRequest(addNewIndex.ServerError.Error);
-        }
-
-        [HttpPatch]
-        [Route("fluentattribute")]
-        public async Task<IActionResult> UpdateWithPartialDoc([FromBody] Company companyData)
-        {
-            var companyDocs = await _elasticClient.SearchAsync<object>(s =>
-                                                                s.Index(IndexName).MatchAll());
-
-            var enumerator = companyDocs.Hits.GetEnumerator();
-            enumerator.MoveNext();
-
-            var docId = enumerator.Current.Id;
-
-            dynamic updateFields = new ExpandoObject();
-            updateFields.is_active = false;
-            updateFields.date_updated = DateTime.UtcNow;
-            updateFields.company_location = companyData.CompanyLocation;
-
-            var addNewIndex = await _elasticClient.UpdateAsync<object>(docId,
-                                                      u => u.Index(IndexName)
-                                                      .Doc(updateFields));
             if (addNewIndex.IsValid)
                 return Ok(addNewIndex.Id);
             else
