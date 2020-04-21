@@ -1,7 +1,9 @@
 ﻿using ElasticSearch.Entities;
+using ElasticSearch.Entities.ECommerce;
 using ElasticSearch.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -88,9 +90,7 @@ namespace ElasticSearch.Controllers
         {
             try
             {
-
                 var sortOrder = postRequestBody.SortOrder != null && postRequestBody.SortOrder == "ASC" ? SortOrder.Ascending : SortOrder.Descending;
-
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
                 .DocValueFields(dd => dd.Field(postRequestBody.SortField))
                 .Sort(ss => ss.Field(postRequestBody.SortField, sortOrder)
@@ -98,10 +98,10 @@ namespace ElasticSearch.Controllers
 
                 var responseObject = new Entities.SearchResponse
                 {
-                    RecordCount = queryResponse.Documents.Count,
+                    RecordCount = queryResponse.HitsMetadata.Total.Value,
                     Records = queryResponse.Documents
                 };
-                return Ok(responseObject);
+                return Ok(JsonConvert.SerializeObject(responseObject));
             }
             catch (Exception ex)
             {
@@ -121,21 +121,49 @@ namespace ElasticSearch.Controllers
         {
             try
             {
+                int? pageIndex = 0;
+
+                if(postRequestBody.PageIndex.HasValue)
+                {
+                    pageIndex = postRequestBody.PageIndex > 1 ? postRequestBody.PageSize + 1 : postRequestBody.PageIndex;
+
+                }
 
                 var queryResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName)
-                                                                                   .From(postRequestBody.PageIndex)
+                                                                                   .From(pageIndex)
                                                                                    .Size(postRequestBody.PageSize));
 
                 var responseObject = new Entities.SearchResponse
                 {
-                    RecordCount=queryResponse.Documents.Count,
+                    RecordCount=queryResponse.HitsMetadata.Total.Value,
                     Records = queryResponse.Documents
                 };
-                return Ok(responseObject);
+                return Ok(JsonConvert.SerializeObject(responseObject));
             }
             catch (Exception ex)
             {
 
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet,Route("multi")]
+        public async Task<IActionResult> GetMultiSearch()
+        {
+            try
+            {
+
+
+                var allRecords = await _elasticClient
+                        .SearchAsync<Product>(s => s
+                        .Index(IndexName)
+                        .MatchAll());
+               
+
+                return Ok(allRecords.Documents);
+            }
+            catch (Exception ex)
+            {
                 return BadRequest(ex.Message);
             }
         }
