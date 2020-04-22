@@ -4,5 +4,6 @@
     {
         public string Group { get; set; }
         public long? DocCount { get; set; }
+        public string Interval { get; set; }
     }
 }

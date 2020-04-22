@@ -19,13 +19,18 @@ namespace ElasticSearch.Controllers
             _elasticClient = elasticClient;
         }
 
+        /// <summary>
+        /// Sample for Bucket Adjacency Matrix Aggregation
+        /// Refer : https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-adjacency-matrix-aggregation.html#search-aggregations-bucket-adjacency-matrix-aggregation
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("bucket/matrix")]
         public async Task<IActionResult> PerformBucketAdjacentMatrix()
         {
             try
             {
-                var agg = new AdjacencyMatrixAggregation("interactions")
+                var agg = new AdjacencyMatrixAggregation("manufactures")
                 {
                     Filters = new NamedFiltersContainer()
                     {
@@ -42,13 +47,58 @@ namespace ElasticSearch.Controllers
                 var searchResponse = await _elasticClient.SearchAsync<object>(searchRequest);
                 if (searchResponse.IsValid)
                 {
-                    var bucketAggregate = ((BucketAggregate)searchResponse.Aggregations["interactions"]).Items;
+                    var bucketAggregate = ((BucketAggregate)searchResponse.Aggregations["manufactures"]).Items;
 
                     var responseList = new List<AggregateResponse>();
                     foreach (var bucket in bucketAggregate)
                     {
                         var item = (KeyedBucket<object>)bucket;
                         responseList.Add(new AggregateResponse() { DocCount = item.DocCount, Group = item.Key.ToString() });
+                    }
+
+                    return Ok(responseList);
+                }
+                else
+                    return BadRequest(searchResponse.ServerError.Error);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Sample for Bucket Auto-interval Date Histogram Aggregation
+        /// Refer : https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-autodatehistogram-aggregation.html
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("bucket/autodatehistogram/{bucketSize}")]
+        public async Task<IActionResult> PerformBucketAutoDateHistogram(int bucketSize)
+        {
+            try
+            {
+                var agg = new AutoDateHistogramAggregation("autoDateHistogram")
+                {
+                   Field = "order_date",
+                   Buckets = bucketSize,
+                   Format = "yyyy-MM-dd"
+                };
+                var searchRequest = new SearchRequest(IndexName)
+                {
+                    Aggregations = agg,
+                    Size = 0
+                };
+                var searchResponse = await _elasticClient.SearchAsync<object>(searchRequest);
+                if (searchResponse.IsValid)
+                {
+                    var bucketAggregate = (BucketAggregate)searchResponse.Aggregations["autoDateHistogram"];
+
+                    var responseList = new List<AggregateResponse>();
+                    foreach (var bucket in bucketAggregate.Items)
+                    {
+                        var item = (DateHistogramBucket)bucket;
+                        responseList.Add(new AggregateResponse() { DocCount = item.DocCount, Group = item.KeyAsString, Interval = bucketAggregate.Interval.Factor + bucketAggregate.Interval.Interval.Value.GetStringValue() });
                     }
 
                     return Ok(responseList);
