@@ -11,6 +11,7 @@ namespace ElasticSearch.Entities.Employee
 
     public class Company : Document
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public string CompanyLocation { get; set; }
         public List<Employee> Employees { get; set; }
