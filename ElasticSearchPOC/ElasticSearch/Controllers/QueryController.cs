@@ -21,12 +21,13 @@ namespace ElasticSearch.Controllers
 
         /// <summary>
         /// https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/writing-queries.html#structured-search
-        /// Used generally for querying data which have a structure
+        /// Used generally for querying data which have a structure.
+        /// Usually part of term level queries and the query input is not analyzed.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [Route("structured")]
-        public async Task<IActionResult> GetSingleOrder()
+        public async Task<IActionResult> StructuredDateRangeQuery()
         {
 
             try
