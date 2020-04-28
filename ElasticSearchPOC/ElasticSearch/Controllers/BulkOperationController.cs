@@ -56,7 +56,7 @@ namespace ElasticSearch.Controllers
             try
             {
                 var indexResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName).MatchAll());
-                var docs = indexResponse.Hits.Select(x => new { Id = x.Id, Name = "zaffar" });
+                var docs = indexResponse.Hits.Select(x => new { x.Id, Name = "zaffar" });
 
                 var queryResponse = await _elasticClient.BulkAsync(x => x
                    .Index(IndexName)
@@ -108,6 +108,7 @@ namespace ElasticSearch.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         /// <summary>
         /// This API call is used for adding multiple document which act as bulk operation but not good recommend for more than 1000 doc 
         /// Reference  : https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/indexing-documents.html
@@ -127,7 +128,6 @@ namespace ElasticSearch.Controllers
             }
             catch (System.Exception ex)
             {
-
                 return BadRequest(ex.Message);
             }
         }

@@ -82,7 +82,9 @@ namespace ElasticSearch.Controllers
                 {
                    Field = "order_date",
                    Buckets = bucketSize,
-                   Format = "yyyy-MM-dd"
+                   Format = "yyyy-MM-dd",
+                   Missing = DateTime.Now.AddYears(-2),
+                   MinimumInterval = MinimumInterval.Hour
                 };
                 var searchRequest = new SearchRequest(IndexName)
                 {

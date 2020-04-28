@@ -6,27 +6,27 @@ namespace ElasticSearch.Entities.ECommerce
     public class CustomerUser
     {
         public List<string> Category { get; set; }
-        public string currency { get; set; }
-        public string customer_first_name { get; set; }
-        public string customer_full_name { get; set; }
-        public string customer_gender { get; set; }
-        public int customer_id { get; set; }
-        public string customer_last_name { get; set; }
-        public string customer_phone { get; set; }
-        public string day_of_week { get; set; }
-        public int day_of_week_i { get; set; }
-        public string email { get; set; }
-        public List<string> manufacturer { get; set; }
-        public DateTime order_date { get; set; }
-        public int order_id { get; set; }
-        public List<Product> products { get; set; }
-        public List<string> sku { get; set; }
-        public double taxful_total_price { get; set; }
-        public double taxless_total_price { get; set; }
-        public int total_quantity { get; set; }
-        public int total_unique_products { get; set; }
-        public string type { get; set; }
-        public string user { get; set; }
-        public Geoip geoip { get; set; }
+        public string Currency { get; set; }
+        public string CustomerFirstName { get; set; }
+        public string CustomerFullName { get; set; }
+        public string CustomerGender { get; set; }
+        public int CustomerId { get; set; }
+        public string CustomerLastName { get; set; }
+        public string CustomerPhone { get; set; }
+        public string DayOfWeek { get; set; }
+        public int DayOfWeekI { get; set; }
+        public string Email { get; set; }
+        public List<string> Manufacturer { get; set; }
+        public DateTime OrderDate { get; set; }
+        public int OrderId { get; set; }
+        public List<Product> Products { get; set; }
+        public List<string> Sku { get; set; }
+        public double TaxfulTotalPrice { get; set; }
+        public double TaxlessTotalPrice { get; set; }
+        public int TotalQuantity { get; set; }
+        public int TotalUniqueProducts { get; set; }
+        public string Type { get; set; }
+        public string User { get; set; }
+        public Geoip Geoip { get; set; }
     }
 }
