@@ -108,41 +108,6 @@ namespace ElasticSearch.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-
-        [HttpPost]
-        [Route("bulkAll")]
-        public async Task<IActionResult> BulkAllOperation([FromBody] List<Company> companies)
-        {
-            try
-            {
-                var InsertResponse = await _elasticClient.BulkAsync(x => x
-                                                 .CreateMany(companies)
-                                                 .Index(IndexName));
-                var indexResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName).MatchAll());
-                var docs = indexResponse.Hits
-                                    .Select(x => new { Id = x.Id, Name = "zaffar" });
-
-                var updateResponse = await _elasticClient.BulkAsync(x => x
-                                                         .Index(IndexName)
-                                                         .UpdateMany(docs, (bu, d) => bu.Doc(d)));
-                var deleteResponse = await _elasticClient.BulkAsync(bb => bb
-                                                                          .DeleteMany<Company>(InsertResponse.Items.Select(x => new Company { Id = x.Id }))
-                                                                          .Index(IndexName));
-                if (InsertResponse.IsValid && updateResponse.IsValid && deleteResponse.IsValid)
-                    return Ok( "All CURD operation is done" );
-               
-                return BadRequest($"{InsertResponse.ServerError} or {updateResponse.ServerError} or {deleteResponse}");
-            }
-            catch (System.Exception ex)
-            {
-
-                return BadRequest(ex.Message);
-            }
-        }
-
-
-
         /// <summary>
         /// This API call is used for adding multiple document which act as bulk operation but not good recommend for more than 1000 doc 
         /// Reference  : https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/indexing-documents.html
