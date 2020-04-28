@@ -109,6 +109,51 @@ namespace ElasticSearch.Controllers
             }
         }
         /// <summary>
+        /// This API gives the example of performing CURD opertion in single Bulk call.
+        /// Reference : https://www.elastic.co/guide/en/elasticsearch/client/net-api/1.x/bulk.html
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("bulk")]
+        public async Task<IActionResult> BulkAllOperation()
+        {
+
+            try
+            {
+
+                var bulkResponse = await _elasticClient.BulkAsync(b => b
+                                                                        .Index<object>(i => i
+                                                                            .Index(IndexName)
+                                                                            .Id("1")
+                                                                            .Document(new { Name = "abc" })
+                                                                        )
+                                                                        .Delete<Company>(d => d
+                                                                            .Index(IndexName)
+                                                                            .Id("2")
+                                                                        )
+                                                                        .Create<Company>(c => c
+                                                                            .Index(IndexName)
+                                                                            .Id("3")
+                                                                            .Document(new Company { Name = "zaffar" })
+                                                                        )
+                                                                        .Update<Company>(u => u
+                                                                            .Index(IndexName)
+                                                                            .Id("1")
+                                                                            .Doc(new Company { Name = "Infrrd.ai" })
+                                                                        )
+                                                                    );
+                if (bulkResponse.IsValid)
+                    return Ok(bulkResponse.Items.Count);
+                return BadRequest(bulkResponse.ServerError);
+            }
+            catch (System.Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
         /// This API call is used for adding multiple document which act as bulk operation but not good recommend for more than 1000 doc 
         /// Reference  : https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/indexing-documents.html
         /// </summary>
