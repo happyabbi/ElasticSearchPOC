@@ -1,7 +1,6 @@
 ﻿using ElasticSearch.Entities.Employee;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,6 +45,37 @@ namespace ElasticSearch.Controllers
 
         }
         /// <summary>
+        /// This method is used for bulk updating the document based on Id
+        /// Reference : https://www.elastic.co/guide/en/elasticsearch/client/net-api/1.x/bulk.html
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("bulkUpdate")]
+        public async Task<IActionResult> BulkUpdate()
+        {
+            try
+            {
+                var indexResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName).MatchAll());
+                var docs = indexResponse.Hits.Select(x => new { Id = x.Id, Name = "zaffar" });
+
+                var queryResponse = await _elasticClient.BulkAsync(x => x
+                   .Index(IndexName)
+                   .UpdateMany(docs, (bu, d) => bu.Doc(d)));
+
+                if (queryResponse.IsValid)
+                    return Ok(queryResponse.Items.Count);
+
+                return BadRequest(queryResponse.ServerError.Error);
+
+            }
+            catch (System.Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
         /// This API is used for Deleting the bulk record
         /// https://www.elastic.co/guide/en/elasticsearch/client/net-api/1.x/delete.html
         /// </summary>
@@ -66,33 +96,10 @@ namespace ElasticSearch.Controllers
                                                                           .Index(IndexName));
                 var list = indexRespone.Items.Select(x => x.Id);
                 var queryResponse = await _elasticClient.BulkAsync(bb => bb
-                                                                           .DeleteMany<Company>(list.Select(x => new Company { Id = x  } ))
+                                                                           .DeleteMany<Company>(list.Select(x => new Company { Id = x }))
                                                                            .Index(IndexName));
                 if (queryResponse.IsValid)
                     return Ok(queryResponse.Items.Count);
-                return BadRequest(queryResponse.ServerError.Error);
-            }
-            catch (System.Exception ex)
-            {
-
-                return BadRequest(ex.Message);
-            }
-        }
-        /// <summary>
-        /// This API call is used for adding a single document to Index
-        /// Reference:https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/indexing-documents.html
-        /// </summary>
-        /// <param name="company"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("singleDoc")]
-        public async Task<IActionResult> SingleDocument([FromBody] Company company)
-        {
-            try
-            {
-                var queryResponse = await _elasticClient.IndexAsync(company, i => i.Index(IndexName));
-                if (queryResponse.IsValid)
-                    return Ok(queryResponse.Result);
                 return BadRequest(queryResponse.ServerError.Error);
             }
             catch (System.Exception ex)
