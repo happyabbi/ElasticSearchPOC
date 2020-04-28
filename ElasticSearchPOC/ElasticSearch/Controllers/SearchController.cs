@@ -194,7 +194,7 @@ namespace ElasticSearch.Controllers
             {
                 var queryResponse = await _elasticClient.GetAsync<CustomerUser>(orderId, 
                                                               g => g.Index(IndexName)
-                                                                    .SourceIncludes(p => p.email, p => p.order_id, p => p.customer_full_name));
+                                                                    .SourceIncludes(p => p.Email, p => p.OrderId, p => p.CustomerFullName));
 
                 if (queryResponse.IsValid)
                     return Ok(JsonConvert.SerializeObject(queryResponse.Source));

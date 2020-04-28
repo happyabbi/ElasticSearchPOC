@@ -56,7 +56,7 @@ namespace ElasticSearch.Controllers
             try
             {
                 var indexResponse = await _elasticClient.SearchAsync<object>(x => x.Index(IndexName).MatchAll());
-                var docs = indexResponse.Hits.Select(x => new { Id = x.Id, Name = "zaffar" });
+                var docs = indexResponse.Hits.Select(x => new { x.Id, Name = "zaffar" });
 
                 var queryResponse = await _elasticClient.BulkAsync(x => x
                    .Index(IndexName)
@@ -108,6 +108,7 @@ namespace ElasticSearch.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         /// <summary>
         /// This API gives the example of performing CURD opertion in single Bulk call.
         /// Reference : https://www.elastic.co/guide/en/elasticsearch/client/net-api/1.x/bulk.html
@@ -172,7 +173,6 @@ namespace ElasticSearch.Controllers
             }
             catch (System.Exception ex)
             {
-
                 return BadRequest(ex.Message);
             }
         }
